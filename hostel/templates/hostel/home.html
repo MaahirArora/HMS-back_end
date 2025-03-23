@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hostel Management</title>
+</head>
+<body>
+    <h1>Available Rooms</h1>
+    <ul>
+        {% for room in rooms %}
+            <li>{{ room.room_number }} - Capacity: {{ room.capacity }} | Occupied: {{ room.occupied }}</li>
+        {% empty %}
+            <li>No rooms available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
