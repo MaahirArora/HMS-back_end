@@ -212,7 +212,7 @@ def list_complaints(request):
             data.append({
                 'id': c.id,
                 'student_name': c.student.name,
-                'student_id': c.student.room.room_number,
+                'student_room': c.student.room.room_number,
                 'complaint_text': c.complaint_text,
                 'date_submitted': c.date_submitted.isoformat(),
                 'status': c.status,
