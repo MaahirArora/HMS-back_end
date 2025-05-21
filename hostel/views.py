@@ -3,6 +3,8 @@ from .models import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.utils import timezone
+
 
 def room_list_api(request):
     if request.method == 'GET':
@@ -79,7 +81,7 @@ def add_student(request):
 
 def student_list_api(request):
     if request.method == 'GET':
-        students = Student.objects.select_related('room').all()
+        students = Student.objects.select_related('room').all() # optimizing query
         data = []
 
         for student in students:
@@ -172,6 +174,52 @@ def booking_list_api(request):
         return JsonResponse(data, safe=False)
 
     return JsonResponse({'error': 'GET method required'}, status=405)
+
+@csrf_exempt
+def new_complaint(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            student_email = data.get('student_email')
+            complaint_text = data.get('complaint_text')
+
+            if not student_email or not complaint_text:
+                return JsonResponse({'error': 'student_email and complaint_text are required.'}, status=400)
+
+            student = Student.objects.get(email=student_email)
+            complaint = Complaint.objects.create(
+                student=student,
+                complaint_text=complaint_text,
+                status='Open',
+                date_submitted=timezone.now()
+            )
+
+            return JsonResponse({'message': 'Complaint submitted successfully.', 'complaint_id': complaint.id}, status=201)
+        
+        except Student.DoesNotExist:
+            return JsonResponse({'error': 'Student not found.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'POST method required.'}, status=405)
+
+
+def list_complaints(request):
+    if request.method == 'GET':
+        complaints = Complaint.objects.select_related('student').order_by('-date_submitted')
+        data = []
+        for c in complaints:
+            data.append({
+                'id': c.id,
+                'student_name': c.student.name,
+                'student_id': c.student.room.room_number,
+                'complaint_text': c.complaint_text,
+                'date_submitted': c.date_submitted.isoformat(),
+                'status': c.status,
+            })
+        return JsonResponse(data, safe=False)
+    
+    return JsonResponse({'error': 'GET method required.'}, status=405)
 
 
 def home(request):
