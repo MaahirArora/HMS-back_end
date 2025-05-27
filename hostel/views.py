@@ -4,7 +4,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.utils import timezone
-
+from rest_framework import viewsets
+from .models import Student, Room, Booking, Complaint
+from .serializers import StudentSerializer, RoomSerializer, BookingSerializer, ComplaintSerializer
 
 def room_list_api(request):
     if request.method == 'GET':
@@ -221,6 +223,21 @@ def list_complaints(request):
     
     return JsonResponse({'error': 'GET method required.'}, status=405)
 
+class StudentViewSet(viewsets.ModelViewSet):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+
+class RoomViewSet(viewsets.ModelViewSet):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+
+class BookingViewSet(viewsets.ModelViewSet):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+
+class ComplaintViewSet(viewsets.ModelViewSet):
+    queryset = Complaint.objects.all()
+    serializer_class = ComplaintSerializer
 
 def home(request):
     rooms = Room.objects.all()
