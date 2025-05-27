@@ -6,12 +6,12 @@ from .models import Student, Room, Booking, Complaint
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ['id', 'name', 'email', 'phone']
+        fields = ['id', 'name', 'email', 'phone', 'room']
 
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
-        fields = ['id', 'room_number', 'capacity', 'occupied']
+        fields = '__all__'  # This will include all fields in the Room model
 
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
