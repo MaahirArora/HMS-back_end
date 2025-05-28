@@ -13,6 +13,16 @@ class Room(models.Model):
     room_number = models.CharField(max_length=10, unique=True)
     capacity = models.IntegerField()
     occupied = models.IntegerField(default=0)
+    issue = models.TextField(blank=True, null=True)
+    
+    @property
+    def status(self):
+        if self.occupied == 0:
+            return "Vacant"
+        elif self.occupied < self.capacity:
+            return "Partially Occupied"
+        else:
+            return "Occupied"
 
     def __str__(self):
         return f"Room {self.room_number}"
