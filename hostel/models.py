@@ -51,6 +51,6 @@ class Complaint(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     complaint_text = models.TextField()
     date_submitted = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"Complaint by {self.student.name} on {self.date_submitted}"

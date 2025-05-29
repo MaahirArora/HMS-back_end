@@ -23,7 +23,12 @@ class BookingSerializer(serializers.ModelSerializer):
         model = Booking
         fields = ['id', 'start_date', 'end_date']
 
+from rest_framework import serializers
+from .models import Complaint
+
 class ComplaintSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source="student.name", read_only=True)
+
     class Meta:
         model = Complaint
-        fields = ['id', 'complaint_text', 'status', 'date_submitted']
+        fields = ['id', 'status', 'complaint_text', 'date_submitted', 'student_name']
