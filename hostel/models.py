@@ -1,10 +1,21 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-class Student(models.Model):
+class Student(AbstractUser):
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15)
-    room = models.ForeignKey('Room', on_delete=models.SET_NULL, null=True, blank=True)
+    room = models.ForeignKey('Room', on_delete=models.PROTECT, null=True, blank=True)
+    title = models.CharField(default='Student', max_length=50)
+
+    USERNAME_FIELD = 'email'
+
+    REQUIRED_FIELDS = ['name', 'phone', 'room']
+
+    def save(self, *args, **kwargs):
+        if not self.username:
+            self.username = self.email  # auto-fill username with email
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

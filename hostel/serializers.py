@@ -31,4 +31,4 @@ class ComplaintSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Complaint
-        fields = ['id', 'status', 'complaint_text', 'date_submitted', 'student_name']
+        fields = '__all__' 

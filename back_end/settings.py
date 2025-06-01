@@ -39,9 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'myapp',
-    'hostel',
     'corsheaders',
+    'hostel.apps.StudentsConfig',
 ]
+
+AUTH_USER_MODEL = 'hostel.Student'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
