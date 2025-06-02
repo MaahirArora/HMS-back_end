@@ -4,9 +4,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.utils import timezone
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from django.http import JsonResponse
 from .models import Student, Room, Booking, Complaint
 from .serializers import StudentSerializer, RoomSerializer, BookingSerializer, ComplaintSerializer
+from rest_framework.response import Response
 
 def room_list_api(request):
     if request.method == 'GET':
@@ -235,9 +237,32 @@ class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
+# class ComplaintViewSet(viewsets.ModelViewSet):
+#     queryset = Complaint.objects.all()
+#     serializer_class = ComplaintSerializer
+
+
 class ComplaintViewSet(viewsets.ModelViewSet):
     queryset = Complaint.objects.all()
     serializer_class = ComplaintSerializer
+
+    def create(self, request, *args, **kwargs):
+        student_email = request.data.get("student_email")
+        complaint_text = request.data.get("complaint_text")
+        status_ = request.data.get("status", "Open")
+
+        try:
+            student = Student.objects.get(email=student_email)
+        except Student.DoesNotExist:
+            return Response({"error": "Student not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+        complaint = Complaint.objects.create(
+            student=student,
+            complaint_text=complaint_text,
+            status=status_,
+        )
+        return Response(ComplaintSerializer(complaint).data, status=status.HTTP_201_CREATED)
+
 
 def home(request):
     rooms = Room.objects.all()
