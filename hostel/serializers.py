@@ -1,7 +1,36 @@
 # hostel/serializers.py
-
 from rest_framework import serializers
 from .models import Student, Room, Booking, Complaint
+from django.contrib.auth import authenticate
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Student
+        fields = ['email', 'name', 'phone', 'room', 'password']
+
+    def create(self, validated_data):
+        user = Student(
+            email=validated_data['email'],
+            name=validated_data['name'],
+            phone=validated_data['phone'],
+            room=validated_data.get('room')
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+        user = authenticate(email=data['email'], password=data['password'])
+        if user is None:
+            raise serializers.ValidationError("Invalid credentials")
+        return {'user': user}
+
 
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:

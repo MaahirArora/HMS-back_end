@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'myapp',
     'corsheaders',
     'hostel.apps.StudentsConfig',
+    'rest_framework_simplejwt',
 ]
 
 AUTH_USER_MODEL = 'hostel.Student'

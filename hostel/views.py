@@ -7,8 +7,42 @@ from django.utils import timezone
 from rest_framework import viewsets, status
 from django.http import JsonResponse
 from .models import Student, Room, Booking, Complaint
-from .serializers import StudentSerializer, RoomSerializer, BookingSerializer, ComplaintSerializer
+from .serializers import StudentSerializer, RoomSerializer, BookingSerializer, ComplaintSerializer, RegisterSerializer, LoginSerializer
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            tokens = get_tokens_for_user(user)
+            return Response({
+                'message': 'Registration successful',
+                'tokens': tokens
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            tokens = get_tokens_for_user(user)
+            return Response({
+                'message': 'Login successful',
+                'tokens': tokens
+            })
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+
 
 def room_list_api(request):
     if request.method == 'GET':
