@@ -1,24 +1,32 @@
 # hostel/serializers.py
 from rest_framework import serializers
 from .models import Student, Room, Booking, Complaint
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+class StudentRegisterSerializer(serializers.ModelSerializer):
+    confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = Student
-        fields = ['email', 'name', 'phone', 'room', 'password']
+        fields = ['name', 'email', 'phone', 'password', 'confirm_password']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+
+    def validate(self, data):
+        if data['password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match.")
+        validate_password(data['password'])
+        return data
 
     def create(self, validated_data):
-        user = Student(
-            email=validated_data['email'],
-            name=validated_data['name'],
-            phone=validated_data['phone'],
-            room=validated_data.get('room')
-        )
-        user.set_password(validated_data['password'])
-        user.save()
+        validated_data.pop('confirm_password')
+
+        # ✅ Add this line to avoid the missing username error
+        validated_data['username'] = validated_data['email']
+
+        user = Student.objects.create_user(**validated_data)
         return user
 
 class LoginSerializer(serializers.Serializer):
@@ -26,10 +34,11 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, data):
-        user = authenticate(email=data['email'], password=data['password'])
+        user = authenticate(username=data['email'], password=data['password'])
         if user is None:
             raise serializers.ValidationError("Invalid credentials")
         return {'user': user}
+
 
 
 class StudentSerializer(serializers.ModelSerializer):

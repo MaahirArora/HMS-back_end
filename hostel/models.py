@@ -9,16 +9,16 @@ class Student(AbstractUser):
     title = models.CharField(default='Student', max_length=50)
 
     USERNAME_FIELD = 'email'
-
-    REQUIRED_FIELDS = ['name', 'phone', 'room']
+    REQUIRED_FIELDS = ['name', 'phone']  # Only include fields required in the form
 
     def save(self, *args, **kwargs):
         if not self.username:
-            self.username = self.email  # auto-fill username with email
+            self.username = self.email
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
+
 
 class Room(models.Model):
     room_number = models.CharField(max_length=10, unique=True)

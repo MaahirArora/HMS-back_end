@@ -7,7 +7,7 @@ from django.utils import timezone
 from rest_framework import viewsets, status
 from django.http import JsonResponse
 from .models import Student, Room, Booking, Complaint
-from .serializers import StudentSerializer, RoomSerializer, BookingSerializer, ComplaintSerializer, RegisterSerializer, LoginSerializer
+from .serializers import StudentSerializer, RoomSerializer, BookingSerializer, ComplaintSerializer, StudentRegisterSerializer, LoginSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -21,7 +21,7 @@ def get_tokens_for_user(user):
 
 class RegisterView(APIView):
     def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
+        serializer = StudentRegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             tokens = get_tokens_for_user(user)
