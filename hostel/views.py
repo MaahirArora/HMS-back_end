@@ -11,6 +11,7 @@ from .serializers import StudentSerializer, RoomSerializer, BookingSerializer, C
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import action
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -262,6 +263,16 @@ def list_complaints(request):
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
+
+    @action(detail=False, methods=['get'])
+    def by_email(self, request):
+        email = request.query_params.get('email')
+        if email is not None:
+            student = Student.objects.filter(email=email).first()
+            if student:
+                serializer = self.get_serializer(student)
+                return Response(serializer.data)
+        return Response({'detail': 'Student not found.'}, status=404)
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()

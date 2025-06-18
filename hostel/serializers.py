@@ -44,7 +44,7 @@ class LoginSerializer(serializers.Serializer):
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ['id', 'name', 'email', 'phone', 'room']
+        fields = '__all__'  # This will include all fields in the Student model
 
 class RoomSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
