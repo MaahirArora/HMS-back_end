@@ -273,6 +273,18 @@ class StudentViewSet(viewsets.ModelViewSet):
                 serializer = self.get_serializer(student)
                 return Response(serializer.data)
         return Response({'detail': 'Student not found.'}, status=404)
+    
+    @action(detail=False, methods=['get'])
+    def table_info(self, request):
+        row_count = self.queryset.filter(title='Student').count()
+
+        model = self.queryset.model
+        column_count = len([field.name for field in model._meta.get_fields() if not field.auto_created])
+
+        return Response({
+            'rows': row_count,
+            'columns': column_count
+        })
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
