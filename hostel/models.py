@@ -91,3 +91,38 @@ class Complaint(models.Model):
 
     def __str__(self):
         return f"Complaint by {self.student.name} on {self.date_submitted}"
+class Billing(models.Model):
+    STATUS_CHOICES = [
+        ('Paid',    'Paid'),
+        ('Pending', 'Pending'),
+        ('Overdue', 'Overdue'),
+    ]
+
+    invoice_number = models.CharField(max_length=20, unique=True)
+    student        = models.ForeignKey(
+                       Student,
+                       on_delete=models.CASCADE,
+                       related_name='billings'
+                     )
+    room           = models.ForeignKey(
+                       Room,
+                       on_delete=models.PROTECT
+                     )
+    amount         = models.DecimalField(
+                       max_digits=10,
+                       decimal_places=2
+                     )
+    due_date       = models.DateField()
+    status         = models.CharField(
+                       max_length=10,
+                       choices=STATUS_CHOICES,
+                       default='Pending'
+                     )
+
+    class Meta:
+        ordering = ['-due_date']
+        verbose_name = 'Invoice'
+        verbose_name_plural = 'Invoices'
+
+    def __str__(self):
+        return self.invoice_number

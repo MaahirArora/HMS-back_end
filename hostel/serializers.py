@@ -1,6 +1,6 @@
 # hostel/serializers.py
 from rest_framework import serializers
-from .models import Student, Room, Booking, Complaint
+from .models import Student, Room, Booking, Complaint,Billing
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 
@@ -70,3 +70,22 @@ class ComplaintSerializer(serializers.ModelSerializer):
     class Meta:
         model = Complaint
         fields = '__all__' 
+
+class BillingSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.name', read_only=True)
+    room_number  = serializers.CharField(source='room.room_number', read_only=True)
+
+    class Meta:
+        model  = Billing
+        fields = [
+            'id',
+            'invoice_number',
+            'student',
+            'student_name',
+            'room',
+            'room_number',
+            'amount',
+            'due_date',
+            'status',
+        ]
+        read_only_fields = ['id', 'student_name', 'room_number']

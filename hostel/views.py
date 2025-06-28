@@ -7,12 +7,12 @@ from django.utils import timezone
 from rest_framework import viewsets, status
 from django.http import JsonResponse
 from .models import Student, Room, Booking, Complaint
-from .serializers import StudentSerializer, RoomSerializer, BookingSerializer, ComplaintSerializer, StudentRegisterSerializer, LoginSerializer
+from .serializers import StudentSerializer, RoomSerializer, BookingSerializer, ComplaintSerializer, StudentRegisterSerializer, LoginSerializer,BillingSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
-
+from rest_framework.permissions import AllowAny
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     return {
@@ -320,6 +320,10 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         )
         return Response(ComplaintSerializer(complaint).data, status=status.HTTP_201_CREATED)
 
+class BillingViewSet(viewsets.ModelViewSet):
+    queryset           = Billing.objects.all()     # return every invoice
+    serializer_class   = BillingSerializer
+    permission_classes = [AllowAny]    
 
 def home(request):
     rooms = Room.objects.all()
