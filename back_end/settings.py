@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'myapp',
     'corsheaders',
-    'hostel.apps.StudentsConfig',
+    'hostel.apps.HostelConfig',
     'rest_framework_simplejwt',
 ]
 

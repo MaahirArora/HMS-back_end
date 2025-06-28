@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.utils import timezone
+from django.dispatch import receiver
+from django.db.models.signals import post_delete
 from rest_framework import viewsets, status
 from django.http import JsonResponse
 from .models import Student, Room, Booking, Complaint
@@ -13,6 +15,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
+from django.db import transaction
+from django.db import transaction
+from django.db.models import F
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     return {
@@ -21,17 +26,47 @@ def get_tokens_for_user(user):
     }
 
 class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = StudentRegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            tokens = get_tokens_for_user(user)
-            return Response({
-                'message': 'Registration successful',
-                'tokens': tokens
-            }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        # 1. Look for a free room
+        room = (
+            Room.objects
+                .select_for_update()
+                .filter(occupied__lt=F('capacity'))
+                .first()
+        )
+        if room is None:
+            return Response({
+                'message': 'No rooms available at the moment. Please try again later.'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        # 2. Create the user and assign the room in one atomic block
+        with transaction.atomic():
+            user = serializer.save()
+            # force the FK and bump occupied
+            user.room = room
+            user.save(update_fields=['room'])
+            Room.objects.filter(pk=room.pk).update(occupied=F('occupied') + 1)
+
+        tokens = get_tokens_for_user(user)
+        return Response({
+            'message':       'Registration successful',
+            'tokens':        tokens,
+            'room_assigned': room.room_number
+        }, status=status.HTTP_201_CREATED)
+        
+@receiver(post_delete, sender=Student)
+def deallocate_room(sender, instance, **kwargs):
+    room = instance.room
+    if room:
+        # ensure we never go below zero
+        Room.objects.filter(pk=room.pk) \
+                    .update(occupied=F('occupied') - 1)
 class LoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)

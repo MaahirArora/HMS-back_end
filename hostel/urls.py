@@ -8,7 +8,7 @@ router.register(r'students', StudentViewSet)
 router.register(r'rooms', RoomViewSet)
 router.register(r'bookings', BookingViewSet)
 router.register(r'complaints', ComplaintViewSet)
-router.register(r'billing', BillingViewSet)
+router.register(r'billings', BillingViewSet)
 urlpatterns = [
     path('register/', RegisterView.as_view()),
     path('login/', LoginView.as_view()),
