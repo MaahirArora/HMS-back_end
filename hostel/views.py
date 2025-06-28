@@ -17,7 +17,9 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from django.db import transaction
 from django.db import transaction
+from rest_framework import viewsets, permissions
 from django.db.models import F
+from rest_framework.pagination import PageNumberPagination
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     return {
@@ -294,7 +296,6 @@ def list_complaints(request):
         return JsonResponse(data, safe=False)
     
     return JsonResponse({'error': 'GET method required.'}, status=405)
-
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
@@ -359,7 +360,6 @@ class BillingViewSet(viewsets.ModelViewSet):
     queryset           = Billing.objects.all()     # return every invoice
     serializer_class   = BillingSerializer
     permission_classes = [AllowAny]    
-
 def home(request):
     rooms = Room.objects.all()
     return render(request, 'hostel/home.html', {'rooms': rooms})
